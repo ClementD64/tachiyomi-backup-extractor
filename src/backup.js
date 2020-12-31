@@ -13,6 +13,10 @@ Backup.ctor.prototype.generate = function(cat) {
   return (typeof cat === "undefined" ? this.backupManga : this.queryCategories(cat)).map(v => v.entry());
 }
 
+Backup.ctor.prototype.getCategories = function() {
+  return this.backupCategories.map(v => v.name);
+}
+
 BackupManga.ctor.prototype.totalRead = function() {
   const read = this.chapters.filter(v => v.read).length;
   return read !== 0 ? read : undefined;
@@ -22,15 +26,18 @@ BackupManga.ctor.prototype.entry = function() {
   const read = this.totalRead();
   const chapters = this.chapters.length;
   return {
-    title: this.title,
-    read, chapters,
     artist: this.artist.length && this.artist !== this.author ? this.artist : undefined,
     author: this.author,
-    cover: this.thumbnailUrl,
-    genre: this.genre,
-    status: this.status,
+    categories: this.categories,
+    chapters,
     completed: this.status === 2 && read === chapters,
-  }
+    cover: this.thumbnailUrl,
+    description: this.description,
+    genre: this.genre,
+    read,
+    status: this.status,
+    title: this.title,
+  };
 }
 
 module.exports = Backup;

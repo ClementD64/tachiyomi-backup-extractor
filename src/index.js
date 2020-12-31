@@ -38,7 +38,7 @@ function download(url, filename, headers = {}) {
 function writeFile(filename, data, timestamp) {
   return fs.promises.writeFile(
     path.join(dist, filename),
-    JSON.stringify({ timestamp, data })
+    JSON.stringify({ timestamp, ...data })
   );
 }
 
@@ -63,7 +63,10 @@ async function cacheCover(entry) {
 async function write(filename, backup, timestamp, cat) {
   const gen = backup.generate(cat);
   await Promise.all(gen.map(e => cacheCover(e)));
-  return writeFile(filename, gen, timestamp);
+  return writeFile(filename, {
+    mangas: gen,
+    categories: backup.getCategories(),
+  }, timestamp);
 }
 
 const watcher = new Loader(backupDir, async function() {
