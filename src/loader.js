@@ -39,7 +39,7 @@ class Loader {
 
   static parseFilename(filename) {
     const match = filename.match(/^tachiyomi_(?<y>\d+)-(?<M>\d+)-(?<d>\d+)_(?<h>\d+)-(?<m>\d+)\.proto\.gz$/);
-    return Date.UTC(match.groups.y, match.groups.M, match.groups.d, match.groups.h, match.groups.m);
+    return Date.UTC(match.groups.y, match.groups.M - 1, match.groups.d, match.groups.h, match.groups.m) / 1000;
   }
 }
 
