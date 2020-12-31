@@ -1,0 +1,23 @@
+{
+  "name": "tachiyomi-backup-extractor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ClementD64/tachiyomi-backup-extractor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ClementD64/tachiyomi-backup-extractor/issues"
+  },
+  "homepage": "https://github.com/ClementD64/tachiyomi-backup-extractor#readme",
+  "dependencies": {
+    "protobufjs": "^6.10.2"
+  }
+}
