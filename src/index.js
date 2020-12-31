@@ -60,17 +60,17 @@ async function cacheCover(entry) {
   return download(url, fullpath, headers);
 }
 
-async function write(filename, backup, cat) {
+async function write(filename, backup, timestamp, cat) {
   const gen = backup.generate(cat);
   await Promise.all(gen.map(e => cacheCover(e)));
-  return writeFile(filename, gen, backup.timestamp);
+  return writeFile(filename, gen, timestamp);
 }
 
 const watcher = new Loader(backupDir, async function() {
-  await write(outfileAll, this.backup);
+  await write(outfileAll, this.backup, this.timestamp);
 
   for (const entry of categories) {
-    await write(entry.outfile, this.backup, entry.category);
+    await write(entry.outfile, this.backup, this.timestamp, entry.category);
   }
 }).watch();
 
