@@ -1,5 +1,5 @@
 {
-  "name": "tachiyomi-backup-extractor",
+  "name": "tachiyomi-web-progress",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ClementD64/tachiyomi-backup-extractor.git"
+    "url": "git+https://github.com/ClementD64/tachiyomi-web-progress.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ClementD64/tachiyomi-backup-extractor/issues"
+    "url": "https://github.com/ClementD64/tachiyomi-web-progress/issues"
   },
-  "homepage": "https://github.com/ClementD64/tachiyomi-backup-extractor#readme",
+  "homepage": "https://github.com/ClementD64/tachiyomi-web-progress#readme",
   "dependencies": {
     "protobufjs": "^6.10.2"
   }
