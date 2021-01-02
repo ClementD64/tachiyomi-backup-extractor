@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ClementD64/tachiyomi-web-progress#readme",
   "dependencies": {
+    "express": "^4.17.1",
     "protobufjs": "^6.10.2"
   }
 }

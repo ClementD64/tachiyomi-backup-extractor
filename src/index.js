@@ -1,80 +1,66 @@
-const crypto = require('crypto');
-const https = require('https');
 const fs = require('fs');
-const path = require('path');
+const express = require('express');
+const Server = require('./server');
 const Loader = require('./loader');
+const cacheCover = require('./cover');
 
-const dist = process.env.TACHIYOMI_DIST ?? '/dist';
-const backupDir = process.env.TACHIYOMI_BACKUP ?? '/backup';
-const outfileAll = process.env.TOCHIYOMI_OUTFILE ?? "collection.json";
-const coverEndpoint = process.env.TOCHIYOMI_COVER_ENDPOINT ?? "";
+const coverCacheDir = process.env.TACHIYOMI_COVER_CACHE ?? './.cover-cache';
+fs.mkdirSync(coverCacheDir, { recursive: true });
 
-const categories = [];
-for (const key in process.env) {
-  if (!key.startsWith("TOCHIYOMI_CATEGORY")) continue;
-  const env = process.env[key];
-  const index = env.indexOf(',');
-  categories.push({
-    outfile: env.slice(0, index),
-    category: env.slice(index+1)
+function slugify(text) {
+  return text.toString()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accent
+    .toLowerCase()
+    .replace(/\W+/g, '-') // Replace all non-word chars
+    .replace(/\-{2,}/g, '-') // Replace multiple - with single -
+    .replace(/^-+/, '') // Trim - from start of text
+    .replace(/-+$/, ''); // Trim - from end of text
+}
+
+const data = {};
+
+const watcher = new Loader(process.env.TACHIYOMI_BACKUP ?? './backup', async function() {
+  const mangas = {};
+
+  const mapping = {};
+  const categories = process.env.TACHIYOMI_CATEGORIES?.split(',') ?? [];
+
+  this.backup.backupCategories.forEach((v, i) => {
+    if (!categories.includes(v.name)) return;
+    mapping[i] = categories.indexOf(v.name);
   });
-}
 
-fs.mkdirSync(path.join(dist, 'cover'), { recursive: true });
+  const promises = [];
 
-function download(url, filename, headers = {}) {
-  return new Promise((resolve, reject) => {
-    const req = https.request(url, { headers }, res => {
-      if (res.statusCode >= 400) return reject(`Failed to download ${url} ${res.statusCode} ${res.statusMessage}`);
-      const stream = fs.createWriteStream(filename);
-      res.pipe(stream);
-      stream.on('finish', resolve);
-    });
-    req.on('error', reject);
-    req.end();
+  this.backup.backupManga.forEach(manga => {
+    const slug = slugify(manga.title);
+    const cover = cacheCover(manga.thumbnailUrl, coverCacheDir);
+    promises.push(cover.promise);
+    mangas[slug] = {
+      slug,
+      fullEntry: manga.fullEntry(slug),
+      simpleEntry: manga.simpleEntry(slug, manga.categories.map(v => mapping[v]).filter(v => typeof v === "number")),
+      cover: cover.path,
+      coverSource: manga.thumbnailUrl,
+    };
   });
-}
 
-function writeFile(filename, data, timestamp) {
-  return fs.promises.writeFile(
-    path.join(dist, filename),
-    JSON.stringify({ timestamp, ...data })
-  );
-}
+  await Promise.all(promises);
 
-async function cacheCover(entry) {
-  const url = new URL(entry.cover);
-  const ext = path.parse(url.pathname).ext;
-  const outfile = crypto.createHash('sha256').update(entry.cover).digest('hex') + ext;
-  const fullpath = path.join(dist, 'cover', outfile);
-  entry.coverCache = coverEndpoint + outfile;
-
-  if (fs.existsSync(fullpath)) {
-    return;
-  }
-
-  const headers = {};
-  if (url.hostname === "webtoon-phinf.pstatic.net") {
-    headers["Referer"] = "http://www.webtoons.com";
-  }
-  return download(url, fullpath, headers);
-}
-
-async function write(filename, backup, timestamp, cat) {
-  const gen = backup.generate(cat);
-  await Promise.all(gen.map(e => cacheCover(e)));
-  return writeFile(filename, {
-    mangas: gen,
-    categories: backup.getCategories(),
-  }, timestamp);
-}
-
-const watcher = new Loader(backupDir, async function() {
-  await write(outfileAll, this.backup, this.timestamp);
-
-  for (const entry of categories) {
-    await write(entry.outfile, this.backup, this.timestamp, entry.category);
-  }
+  data.mangas = mangas;
+  data.mangasList = Object.values(data.mangas)
+    .map(v => v.simpleEntry)
+    .sort((a, b) => a.title.localeCompare(b.title));
+  data.categories = categories;
+  data.backup = this.backup;
+  data.timestamp = this.timestamp;
 }).watch();
 
-process.on('SIGTERM', () => watcher.close());
+const app = express();
+app.use(process.env.TACHIYOMI_MOUNT_PATH ?? '/', Server(data));
+const server = app.listen(80);
+
+process.on('SIGTERM', () => {
+  watcher.close();
+  server.close();
+});

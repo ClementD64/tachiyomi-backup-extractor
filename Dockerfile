@@ -8,6 +8,9 @@ RUN apk add --no-cache git \
 
 FROM node:15-alpine
 
+ENV TACHIYOMI_BACKUP=/backup
+ENV TACHIYOMI_COVER_CACHE=/tmp/cover-cache
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./

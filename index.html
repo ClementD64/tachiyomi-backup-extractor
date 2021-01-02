@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/css/halfmoon-variables.min.css" rel="stylesheet" />
+    <title>Tachiyomi</title>
+    <style>
+      :root { --content-and-card-spacing-xs: .5rem; }
+
+      .cover-image:after, .manga-cover:after {
+        content: "";
+        display: block;
+        border-radius: inherit;
+        width: 100%;
+        padding-bottom: 145%;
+        background-image: var(--url);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+
+      .cover-image.cover-image-gradient:after {
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.70)), var(--url);
+      }
+
+      .cover-image.cover-image-modal:after {
+        padding-bottom: 50%;
+        border-top-left-radius: var(--base-border-radius);
+        border-top-right-radius: var(--base-border-radius);
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.70), rgba(0, 0, 0, 0.70)), var(--url);
+      }
+
+      @media (min-width: 769px) {
+        :root { --modal-content-width: 76rem; }
+        .cover-image.cover-image-modal:after {
+          padding-bottom: 145%;
+          background-image: var(--url);
+          border-top-right-radius: 0;
+          border-bottom-left-radius: var(--base-border-radius);
+        }
+        .manga-detail {
+          height: calc(var(--modal-content-width) / 3 * 1.45);
+          background-image: var(--url);
+        }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.0/dist/alpine.min.js" defer></script>
+  </head>
+
+  <body
+    class="dark-mode with-custom-webkit-scrollbars with-custom-css-scrollbars"
+    x-data="{ categories: [], lastUpdate: null, current: null }"
+    x-init="loadMangas(d => (categories = d.categories, lastUpdate = d.lastUpdate))"
+  >
+    <div class="page-wrapper">
+      <div class="content-wrapper">
+
+        <div class="container-fluid">
+          <!-- Build categoies -->
+          <template x-for="category in categories" :key="category.name">
+            <div>
+              <h1 class="text-center pt-20" x-text="category.name"></h1>
+    
+              <!-- Build section (Reading, Planned, Ended) -->
+              <template x-for="section in category.mangas" :key="section.name">
+                <div class="content" x-show="section.mangas.length">
+                  <h2 class="font-size-24 ml-10" x-text="section.name"></h2>
+                  <div class="row">
+    
+                    <!-- Build cards -->
+                    <template x-for="manga in section.mangas">
+                      <div class="col-6 col-sm-4 col-lg-3 col-xl-2">
+                        <div class="content" @click="loadModals(manga.slug, m => ($nextTick(() => halfmoon.toggleModal('manga-desc')), current = m.manga))">
+                          <div
+                            class="cover-image cover-image-gradient rounded position-relative"
+                            :style="`--url: url(cover/${manga.slug})`"
+                          >
+                            <div class="position-absolute w-full h-full p-5 d-flex flex-column">
+                              <!-- Progress badge (if up to date) -->
+                              <template x-if="manga.read && manga.read === manga.chapters">
+                                <span class="badge-group" role="group">
+                                  <span class="badge badge-primary" x-text="manga.chapters"></span>
+                                </span>
+                              </template>
+
+                              <!-- Progress badge (if reading) -->
+                              <template x-if="manga.read && manga.read !== manga.chapters">
+                                <span class="badge-group" role="group">
+                                  <span class="badge badge-primary" x-text="manga.read"></span>
+                                  <span class="badge badge-danger" x-text="manga.chapters"></span>
+                                </span>
+                              </template>
+
+                              <!-- Progress badge (if not reading) -->
+                              <template x-if="!manga.read">
+                                <span class="badge-group" role="group">
+                                  <span class="badge badge-danger" x-text="manga.chapters"></span>
+                                </span>
+                              </template>
+
+                              <span class="mt-auto pl-5" x-text="manga.title"></span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+    
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <template x-if="lastUpdate">
+            <div class="content">
+              <p class="text-muted ml-10">Chapters numbers is numbered from index in sources. Excluding chapters blocked by paywall, but including extras chapters. The chapters numbers may not be exact due to this mechanism</p>
+              <p class="text-muted ml-10">Last update: <span x-text="new Date(lastUpdate * 1000).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'long' })"></span></p>
+            </div>
+          </template>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal" id="manga-desc" tabindex="-1" role="dialog">
+      <template x-if="current">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content p-0">
+            <!-- close button -->
+            <button class="close" data-dismiss="modal" type="button" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <div class="row">
+              <!-- cover -->
+              <div
+                class="cover-image cover-image-modal col-12 col-md-4"
+                :style="`--url: url(cover/${current.slug})`"
+              ></div>
+              <div class="manga-detail col-12 col-md-8 p-20 overflow-y-md-auto">
+
+                <div class="d-flex">
+                  <!-- mobile cover -->
+                  <div class="mr-10 mb-10 d-md-none" style="width: 50%;">
+                    <div
+                      class="cover-image rounded"
+                      :style="`--url: url(cover/${current.slug}); margin-top: -70%;`"
+                    ></div>
+                  </div>
+
+                  <div class="w-full">
+                    <div class="d-flex flex-column flex-md-row">
+                      <!-- title -->
+                      <h2 class="content-title m-0" x-text="current.title"></h2>
+                      <!-- status -->
+                      <p class="text-muted ml-md-auto my-5" x-text="getStatus(current.status)"></p>
+                    </div>
+                    <!-- author -->
+                    <p class="text-muted my-5" x-text="current.author"></p>
+                    <!-- artist -->
+                    <template x-if="current.artist">
+                      <p class="text-muted my-5" x-text="current.artist"></p>
+                    </template>
+                  </div>
+                </div>
+
+                <!-- genre -->
+                <template x-for="genre in current.genre" :key="genre">
+                  <span class="badge badge-pill" x-text="genre"></span>
+                </template>
+                <!-- progress -->
+                <div class="progress-group mt-5">
+                  <span class="progress-group-label" x-text="`${current.read || 0} / ${current.chapters}`"></span>
+                  <div class="progress">
+                    <div
+                      :class="{
+                        'progress-bar': true,
+                        'bg-danger': !current.read,
+                        'bg-success': !current.completed && current.read && current.read === current.chapters,
+                        'bg-secondary': !current.completed && current.read && current.read !== current.chapters
+                      }"
+                      role="progressbar"
+                      :style="`width: ${!current.read ? 100 : (current.read || 0) / current.chapters * 100}%;`"
+                      :aria-valuenow="current.read || 0"
+                      :aria-valuemin="0"
+                      :aria-valuemax="current.chapters"
+                    ></div>
+                  </div>
+                  <span class="progress-group-label" x-text="`${Math.floor((current.read || 0) / current.chapters * 100)}%`"></span>
+                </div>
+                <!-- description -->
+                <p class="text-muted" x-text="current.description"></p>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/js/halfmoon.min.js"></script>
+    <script>
+      const filters = [
+        ['Reading', e => e.filter(v => !v.completed && v.read)],
+        ['Planned', e => e.filter(v => typeof v.read === "undefined")],
+        ['Ended', e => e.filter(v => v.completed)],
+      ];
+
+      function applyFilter(data) {
+        return filters.map(([name, filter]) => ({
+          name,
+          mangas: filter(data),
+        }));
+      }
+
+      function filterCategories(name, data) {
+        const index = data.categories.indexOf(name);
+        const mangas = data.mangas.filter(v => v.categories.includes(index));
+
+        return applyFilter(mangas);
+      }
+
+      function filterManga(data) {
+        return {
+          categories: Array.isArray(data.categories)
+            ? data.categories.map(name => ({
+              name,
+              mangas: filterCategories(name, data),
+            })) : [{
+              name: "Tachiyomi",
+              mangas: applyFilter(data.mangas),
+            }],
+            lastUpdate: data.lastUpdate,
+        };
+      }
+
+      function loadMangas(callback = ()=>{}) {
+        fetch("mangas")
+          .then(d => d.json())
+          .then(filterManga)
+          .then(callback);
+      }
+
+      function loadModals(slug, callback = ()=>{}) {
+        fetch(`manga/${slug}`)
+          .then(d => d.json())
+          .then(callback);
+      }
+
+      function getStatus(status) {
+        switch (status) {
+          case 1: return "Ongoing";
+          case 2: return "Completed";
+          default: return "Unknow";
+        }
+      }
+    </script>
+  </body>
+</html>
+

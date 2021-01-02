@@ -4,34 +4,33 @@ const root = protobuf.loadSync(process.env.TACHIYOMI_PROTO ?? 'tachiyomi.proto')
 const Backup = root.lookupType('Backup');
 const BackupManga = root.lookupType('BackupManga');
 
-Backup.ctor.prototype.queryCategories = function(name) {
-  const index = this.backupCategories.findIndex(v => v.name === name);
-  return this.backupManga.filter(v => v.categories.includes(index));
-}
-
-Backup.ctor.prototype.generate = function(cat) {
-  return (typeof cat === "undefined" ? this.backupManga : this.queryCategories(cat)).map(v => v.entry());
-}
-
-Backup.ctor.prototype.getCategories = function() {
-  return this.backupCategories.map(v => v.name);
-}
-
 BackupManga.ctor.prototype.totalRead = function() {
   const read = this.chapters.filter(v => v.read).length;
   return read !== 0 ? read : undefined;
 }
 
-BackupManga.ctor.prototype.entry = function() {
+BackupManga.ctor.prototype.simpleEntry = function(slug, categories = []) {
   const read = this.totalRead();
   const chapters = this.chapters.length;
   return {
-    artist: this.artist.length && this.artist !== this.author ? this.artist : undefined,
-    author: this.author,
-    categories: this.categories,
+    slug,
+    categories: categories.length ? categories : undefined,
     chapters,
     completed: this.status === 2 && read === chapters,
-    cover: this.thumbnailUrl,
+    read,
+    title: this.title,
+  };
+}
+
+BackupManga.ctor.prototype.fullEntry = function(slug) {
+  const read = this.totalRead();
+  const chapters = this.chapters.length;
+  return {
+    slug,
+    artist: this.artist.length && this.artist !== this.author ? this.artist : undefined,
+    author: this.author,
+    chapters,
+    completed: this.status === 2 && read === chapters,
     description: this.description,
     genre: this.genre,
     read,
