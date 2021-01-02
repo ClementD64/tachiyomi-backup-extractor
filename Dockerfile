@@ -18,5 +18,6 @@ RUN npm install
 
 COPY --from=models /models/tachiyomi.proto ./tachiyomi.proto
 COPY src src
+COPY index.html index.html
 
 ENTRYPOINT [ "node", "src" ]
