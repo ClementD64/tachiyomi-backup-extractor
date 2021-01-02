@@ -3,6 +3,11 @@ const fs = require('fs');
 const https = require('https');
 const path = require('path');
 
+const coverTTL = Number(process.env.TACHIYOMI_COVER_TTL ?? 604800) * 1000;
+if (isNaN(coverTTL)) {
+  throw new Error(`Invalid cover TTL ${process.env.TACHIYOMI_COVER_TTL}`);
+}
+
 function download(url, filename, headers = {}) {
   return new Promise((resolve, reject) => {
     const req = https.request(url, { headers }, res => {
@@ -35,7 +40,8 @@ function cacheCover(coverUrl, coverDir) {
   return {
     path: fullpath,
     promise: (async () => {
-      if (!await fs.promises.access(fullpath, fs.constants.F_OK).catch(()=>true)) {
+      const stat = await fs.promises.stat(fullpath).catch(() => false);
+      if (stat && Date.now() - stat.mtimeMs < coverTTL) {
         return;
       }
 

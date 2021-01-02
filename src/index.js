@@ -56,9 +56,14 @@ const watcher = new Loader(process.env.TACHIYOMI_BACKUP ?? './backup', async fun
   data.timestamp = this.timestamp;
 }).watch();
 
+const listenPort = Number(process.env.TACHIYOMI_LISTEN_PORT ?? 8080);
+if (isNaN(listenPort) || listenPort < 0 || listenPort > 65535) {
+  throw new Error(`Invalid port ${process.env.TACHIYOMI_LISTEN_PORT}`);
+}
+
 const app = express();
 app.use(process.env.TACHIYOMI_MOUNT_PATH ?? '/', Server(data));
-const server = app.listen(80);
+const server = app.listen(listenPort);
 
 process.on('SIGTERM', () => {
   watcher.close();

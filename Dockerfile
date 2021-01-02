@@ -8,6 +8,7 @@ RUN apk add --no-cache git \
 
 FROM node:15-alpine
 
+ENV TACHIYOMI_LISTEN_PORT=80
 ENV TACHIYOMI_BACKUP=/backup
 ENV TACHIYOMI_COVER_CACHE=/tmp/cover-cache
 
@@ -20,4 +21,5 @@ COPY --from=models /models/tachiyomi.proto ./tachiyomi.proto
 COPY src src
 COPY index.html index.html
 
+EXPOSE 80
 ENTRYPOINT [ "node", "src" ]
