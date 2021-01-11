@@ -115,7 +115,7 @@
           <template x-if="lastUpdate">
             <div class="content">
               <p class="text-muted ml-10">Chapters numbers is numbered from index in sources. Excluding chapters blocked by paywall, but including extras chapters. The chapters numbers may not be exact due to this mechanism</p>
-              <p class="text-muted ml-10">Last update: <span x-text="new Date(lastUpdate * 1000).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'long' })"></span></p>
+              <p class="text-muted ml-10">Last update: <span x-text="new Date(lastUpdate * 1000).toString()"></span></p>
             </div>
           </template>
         </div>
