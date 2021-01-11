@@ -16,7 +16,6 @@ BackupManga.ctor.prototype.simpleEntry = function(slug, categories = []) {
     slug,
     categories: categories.length ? categories : undefined,
     chapters,
-    completed: this.status === 2 && read === chapters,
     read,
     title: this.title,
   };
@@ -30,7 +29,6 @@ BackupManga.ctor.prototype.fullEntry = function(slug) {
     artist: this.artist.length && this.artist !== this.author ? this.artist : undefined,
     author: this.author,
     chapters,
-    completed: this.status === 2 && read === chapters,
     description: this.description,
     genre: this.genre,
     read,

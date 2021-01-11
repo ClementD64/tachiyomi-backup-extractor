@@ -176,8 +176,8 @@
                       :class="{
                         'progress-bar': true,
                         'bg-danger': !current.read,
-                        'bg-success': !current.completed && current.read && current.read === current.chapters,
-                        'bg-secondary': !current.completed && current.read && current.read !== current.chapters
+                        'bg-success': current.read && current.read === current.chapters && current.status !== 2,
+                        'bg-secondary': current.read && current.read !== current.chapters
                       }"
                       role="progressbar"
                       :style="`width: ${!current.read ? 100 : (current.read || 0) / current.chapters * 100}%;`"
@@ -201,9 +201,9 @@
     <script src="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/js/halfmoon.min.js"></script>
     <script>
       const filters = [
-        ['Reading', e => e.filter(v => !v.completed && v.read)],
+        ['Reading', e => e.filter(v => v.read && !(v.status === 2 && v.read === v.chapters))],
         ['Planned', e => e.filter(v => typeof v.read === "undefined")],
-        ['Ended', e => e.filter(v => v.completed)],
+        ['Ended', e => e.filter(v => v.status === 2 && v.read === v.chapters)],
       ];
 
       function applyFilter(data) {
