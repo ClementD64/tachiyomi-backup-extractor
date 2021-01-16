@@ -78,24 +78,24 @@
                           >
                             <div class="position-absolute w-full h-full p-5 d-flex flex-column">
                               <!-- Progress badge (if up to date) -->
-                              <template x-if="manga.read && manga.read === manga.chapters">
+                              <template x-if="manga.read && manga.read === manga.total">
                                 <span class="badge-group" role="group">
-                                  <span class="badge badge-primary" x-text="manga.chapters"></span>
+                                  <span class="badge badge-primary" x-text="manga.total"></span>
                                 </span>
                               </template>
 
                               <!-- Progress badge (if reading) -->
-                              <template x-if="manga.read && manga.read !== manga.chapters">
+                              <template x-if="manga.read && manga.read !== manga.total">
                                 <span class="badge-group" role="group">
                                   <span class="badge badge-primary" x-text="manga.read"></span>
-                                  <span class="badge badge-danger" x-text="manga.chapters"></span>
+                                  <span class="badge badge-danger" x-text="manga.total"></span>
                                 </span>
                               </template>
 
                               <!-- Progress badge (if not reading) -->
                               <template x-if="!manga.read">
                                 <span class="badge-group" role="group">
-                                  <span class="badge badge-danger" x-text="manga.chapters"></span>
+                                  <span class="badge badge-danger" x-text="manga.total"></span>
                                 </span>
                               </template>
 
@@ -170,23 +170,23 @@
                 </template>
                 <!-- progress -->
                 <div class="progress-group mt-5">
-                  <span class="progress-group-label" x-text="`${current.read || 0} / ${current.chapters}`"></span>
+                  <span class="progress-group-label" x-text="`${current.read || 0} / ${current.total}`"></span>
                   <div class="progress">
                     <div
                       :class="{
                         'progress-bar': true,
                         'bg-danger': !current.read,
-                        'bg-success': current.read && current.read === current.chapters && current.status !== 2,
-                        'bg-secondary': current.read && current.read !== current.chapters
+                        'bg-success': current.read && current.read === current.total && current.status !== 2,
+                        'bg-secondary': current.read && current.read !== current.total
                       }"
                       role="progressbar"
-                      :style="`width: ${!current.read ? 100 : (current.read || 0) / current.chapters * 100}%;`"
+                      :style="`width: ${!current.read ? 100 : (current.read || 0) / current.total * 100}%;`"
                       :aria-valuenow="current.read || 0"
                       :aria-valuemin="0"
-                      :aria-valuemax="current.chapters"
+                      :aria-valuemax="current.total"
                     ></div>
                   </div>
-                  <span class="progress-group-label" x-text="`${Math.floor((current.read || 0) / current.chapters * 100)}%`"></span>
+                  <span class="progress-group-label" x-text="`${Math.floor((current.read || 0) / current.total * 100)}%`"></span>
                 </div>
                 <!-- description -->
                 <p class="text-muted" x-text="current.description"></p>
@@ -201,9 +201,9 @@
     <script src="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/js/halfmoon.min.js"></script>
     <script>
       const filters = [
-        ['Reading', e => e.filter(v => v.read && !(v.status === 2 && v.read === v.chapters))],
+        ['Reading', e => e.filter(v => v.read && !(v.status === 2 && v.read === v.total))],
         ['Planned', e => e.filter(v => typeof v.read === "undefined")],
-        ['Ended', e => e.filter(v => v.status === 2 && v.read === v.chapters)],
+        ['Ended', e => e.filter(v => v.status === 2 && v.read === v.total)],
       ];
 
       function applyFilter(data) {

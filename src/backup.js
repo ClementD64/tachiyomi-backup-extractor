@@ -11,11 +11,11 @@ BackupManga.ctor.prototype.totalRead = function() {
 
 BackupManga.ctor.prototype.simpleEntry = function(slug, categories = []) {
   const read = this.totalRead();
-  const chapters = this.chapters.length;
+  const total = this.chapters.length;
   return {
     slug,
     categories: categories.length ? categories : undefined,
-    chapters,
+    total,
     read,
     title: this.title,
   };
@@ -23,12 +23,12 @@ BackupManga.ctor.prototype.simpleEntry = function(slug, categories = []) {
 
 BackupManga.ctor.prototype.fullEntry = function(slug) {
   const read = this.totalRead();
-  const chapters = this.chapters.length;
+  const total = this.chapters.length;
   return {
     slug,
     artist: this.artist.length && this.artist !== this.author ? this.artist : undefined,
     author: this.author,
-    chapters,
+    total,
     description: this.description,
     genre: this.genre,
     read,
