@@ -114,7 +114,7 @@
 
           <template x-if="lastUpdate">
             <div class="content">
-              <p class="text-muted ml-10">Chapters numbers is numbered from index in sources. Excluding chapters blocked by paywall, but including extras chapters. The chapters numbers may not be exact due to this mechanism</p>
+              <p class="text-muted ml-10">The numbers of chapters is calculated from index in sources. Excluding chapters blocked by paywall, but including extras chapters. The number of chapters may not be exact due to this mechanism</p>
               <p class="text-muted ml-10">Last update: <span x-text="new Date(lastUpdate * 1000).toString()"></span></p>
             </div>
           </template>
@@ -190,6 +190,16 @@
                 </div>
                 <!-- description -->
                 <p class="text-muted" x-text="current.description"></p>
+
+                <table class="table">
+                  <tbody>
+                    <template x-for="chapter in current.chapters" :key="chapter.number">
+                      <tr>
+                        <td :class="chapter.read ? 'text-muted' : ''" x-text="chapter.name"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
 
               </div>
             </div>

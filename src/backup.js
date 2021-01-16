@@ -15,9 +15,9 @@ BackupManga.ctor.prototype.simpleEntry = function(slug, categories = []) {
   return {
     slug,
     categories: categories.length ? categories : undefined,
-    total,
     read,
     title: this.title,
+    total,
   };
 }
 
@@ -28,12 +28,17 @@ BackupManga.ctor.prototype.fullEntry = function(slug) {
     slug,
     artist: this.artist.length && this.artist !== this.author ? this.artist : undefined,
     author: this.author,
-    total,
+    chapters: this.chapters.sort((a, b) => b.sourceOrder - a.sourceOrder).map(v => ({
+      name: v.name,
+      read: v.read,
+      number: v.chapterNumber,
+    })),
     description: this.description,
     genre: this.genre,
     read,
     status: this.status,
     title: this.title,
+    total,
   };
 }
 
