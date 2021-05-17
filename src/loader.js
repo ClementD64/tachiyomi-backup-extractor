@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const { gunzipSync } = require('zlib');
 const Backup = require('./backup');
@@ -14,31 +14,35 @@ class Loader {
     this.callback = callback;
   }
 
-  watch() {
-    this.load();
+  async watch() {
+    await this.load();
     return fs.watch(this.root, () => this.load());
   }
 
-  load() {
-    const last = this.getLatestFile();
+  async load() {
+    const last = await this.getLatestFile();
     this.timestamp = last[1];
-    this.loadBackup(path.join(this.root, last[0]));
+    await this.loadBackup(path.join(this.root, last[0]));
     this.callback();
   }
 
-  getLatestFile() {
-    return fs.readdirSync(this.root)
+  async getLatestFile() {
+    return (await fs.readdir(this.root))
       .filter(v => v.endsWith(".proto.gz"))
       .map(v => [v, Loader.parseFilename(v)])
+      .filter(v => v[1])
       .sort((a, b) => b[1] - a[1])[0];
   }
 
-  loadBackup(filename) {
-    this.backup = Backup.decode(gunzipSync(fs.readFileSync(filename)));
+  async loadBackup(filename) {
+    this.backup = Backup.decode(gunzipSync(await fs.readFile(filename)));
   }
 
   static parseFilename(filename) {
     const match = filename.match(/^tachiyomi_(?<y>\d+)-(?<M>\d+)-(?<d>\d+)_(?<h>\d+)-(?<m>\d+)\.proto\.gz$/);
+    if (match === null) {
+      return;
+    }
     return new Date(match.groups.y, match.groups.M - 1, match.groups.d, match.groups.h, match.groups.m).getTime() / 1000;
   }
 }
