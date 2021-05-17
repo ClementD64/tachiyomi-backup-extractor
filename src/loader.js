@@ -1,4 +1,4 @@
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 const { gunzipSync } = require('zlib');
 const Backup = require('./backup');
@@ -27,7 +27,7 @@ class Loader {
   }
 
   async getLatestFile() {
-    return (await fs.readdir(this.root))
+    return (await fs.promises.readdir(this.root))
       .filter(v => v.endsWith(".proto.gz"))
       .map(v => [v, Loader.parseFilename(v)])
       .filter(v => v[1])
@@ -35,7 +35,7 @@ class Loader {
   }
 
   async loadBackup(filename) {
-    this.backup = Backup.decode(gunzipSync(await fs.readFile(filename)));
+    this.backup = Backup.decode(gunzipSync(await fs.promises.readFile(filename)));
   }
 
   static parseFilename(filename) {
