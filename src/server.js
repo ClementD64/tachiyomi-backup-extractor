@@ -38,7 +38,7 @@ function cover_$slug(data) {
       return;
     }
 
-    res.sendFile(data.mangas[slug].cover);
+    res.sendFile(path.resolve(data.mangas[slug].cover));
   }
 }
 

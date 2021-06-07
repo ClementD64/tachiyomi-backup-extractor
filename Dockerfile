@@ -1,12 +1,7 @@
-FROM node:15-alpine as models
+FROM denoland/deno:alpine as models
+RUN deno run --allow-net --allow-write https://raw.githubusercontent.com/ClementD64/tachiyomi-backup-models/main/mod.ts tachiyomi.proto
 
-RUN apk add --no-cache git \
- && git clone https://github.com/ClementD64/tachiyomi-protobuf-models.git models \
- && cd models \
- && git clone https://github.com/tachiyomiorg/tachiyomi.git \
- && node generate-models.js tachiyomi.proto
-
-FROM node:15-alpine
+FROM node:16-alpine
 
 ENV TACHIYOMI_LISTEN_PORT=80
 ENV TACHIYOMI_BACKUP=/backup
@@ -17,7 +12,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-COPY --from=models /models/tachiyomi.proto ./tachiyomi.proto
+COPY --from=models /tachiyomi.proto ./tachiyomi.proto
 COPY src src
 COPY index.html index.html
 
